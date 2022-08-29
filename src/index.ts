@@ -21,13 +21,14 @@ const startApp = async () => {
 
   try {
     await mongoose.connect(process.env.DATABASE_URL);
-    console.info("MongoDB Connected!");
+    console.info("Connected: MongoDB");
   } catch (error) {
     console.error(error);
   }
 
-  app.listen(3000, async () => {
-    console.info("Listening on port 3000!");
+  const appPort = process.env.PORT || 3000;
+  app.listen(appPort, () => {
+    console.info(`App port: ${appPort}`);
   });
 };
 
