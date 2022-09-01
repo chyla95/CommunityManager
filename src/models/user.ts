@@ -1,26 +1,40 @@
 import mongoose from "mongoose";
 import { Password } from "../services/password";
 
-const userSchema = new mongoose.Schema({
-  email: {
-    type: String,
-    required: true,
+const schemaOptions: mongoose.SchemaOptions = {
+  timestamps: true,
+  toJSON: {
+    virtuals: true,
+    transform(doc, ret) {
+      delete ret._id;
+      delete ret.password;
+    },
   },
-  password: {
-    type: String,
-    required: true,
-  },
-});
+};
 
-userSchema.pre("save", async function (done) {
+const schema = new mongoose.Schema(
+  {
+    email: {
+      type: String,
+      required: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+  },
+  schemaOptions
+);
+
+schema.pre("save", async function (done) {
   if (this.isModified("password")) {
-    const hashed = await Password.toHash(this.get("password"));
+    const hashed = await Password.encrypt(this.get("password"));
     this.set("password", hashed);
   }
   done();
 });
 
-const UserModel = mongoose.model("User", userSchema);
+const UserModel = mongoose.model("User", schema);
 
 interface IUser {
   email: string;
@@ -28,7 +42,15 @@ interface IUser {
 }
 
 export class User extends UserModel {
+  createdAt: any;
+  updatedAt: any;
+
   constructor(parameters: IUser) {
     super(parameters);
   }
+
+  isPasswordValid = async (password: string) => {
+    const isPasswordValid = await Password.compare(this.password, password);
+    return isPasswordValid;
+  };
 }
