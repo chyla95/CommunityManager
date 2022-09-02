@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
 import { Password } from "../services/password";
 
-export type UserDocument = mongoose.Document & {
+export interface IUser extends mongoose.Document {
   email: string;
   password: string;
 
   isPasswordValid: (password: string) => Promise<boolean>;
-};
+}
 
 const schemaOptions: mongoose.SchemaOptions = {
   timestamps: true,
@@ -20,7 +20,7 @@ const schemaOptions: mongoose.SchemaOptions = {
   },
 };
 
-const schema = new mongoose.Schema<UserDocument>(
+const schema = new mongoose.Schema<IUser>(
   {
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
@@ -41,4 +41,4 @@ schema.methods.isPasswordValid = async function (password: string) {
   return isPasswordValid;
 };
 
-export const User = mongoose.model<UserDocument>("User", schema);
+export const User = mongoose.model<IUser>("User", schema);

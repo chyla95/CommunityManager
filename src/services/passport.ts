@@ -1,7 +1,7 @@
 import passport from "passport";
 import { Strategy, ExtractJwt } from "passport-jwt";
 import { Algorithm, default as jsonwebtoken } from "jsonwebtoken";
-import { User, UserDocument } from "../models/user";
+import { User, IUser } from "../models/user";
 import { configJwt } from "../configuration/configuration";
 
 const strategyOptions = {
@@ -13,7 +13,7 @@ const strategyOptions = {
 passport.use(
   new Strategy(strategyOptions, async (payload, done) => {
     try {
-      const user = await User.findOne({ _id: payload.userId });
+      const user = await User.findOne({ id: payload.userId });
       if (!user) {
         return done(null, false);
       }
@@ -24,9 +24,9 @@ passport.use(
   })
 );
 
-export const issueJwt = (user: UserDocument) => {
+export const issueJwt = (user: IUser) => {
   const payload = {
-    userId: user._id,
+    userId: user.id,
   };
 
   const signedToken = jsonwebtoken.sign(payload, process.env.JWT_RSA_PRIVATE_KEY!, {
@@ -40,9 +40,9 @@ export const issueJwt = (user: UserDocument) => {
   };
 };
 
-// Extending "req.user" with "UserDocument" model's properties
+// Extending "req.user" with "IUser" properties
 declare global {
   namespace Express {
-    interface User extends UserDocument {}
+    interface User extends IUser {}
   }
 }

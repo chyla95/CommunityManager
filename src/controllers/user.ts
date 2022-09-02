@@ -43,7 +43,7 @@ export const getCurrentUser = async (req: Request, res: Response, next: NextFunc
     return next(new BadRequestError("No User Is Logged In!"));
   }
 
-  const user = await User.findOne({ _id: req.user.id });
+  const user = await User.findOne({ id: req.user.id });
   if (!user) {
     return next(new BadRequestError("User Not Found!"));
   }
