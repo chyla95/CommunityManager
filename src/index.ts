@@ -1,22 +1,34 @@
 import express from "express";
 import mongoose from "mongoose";
 
-import { User } from "./models/user";
+import { handleException } from "./middlewares/handle-exception";
+import { validateRoute } from "./middlewares/validate-route";
+import { router as userRouter } from "./routes/user";
+
+//verifyJWT(passport);
+//passport.initialize();
 
 const app = express();
 
-app.get("/", async (req, res) => {
-  await User.create({ email: "test@test.com", password: "kk" });
-  const userCount = await User.countDocuments({});
-  console.info("Users: " + userCount);
-  await User.deleteMany({});
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-  res.send("Empty!");
-});
+app.use(userRouter);
+app.use("/api/user", userRouter);
+app.use(validateRoute);
+app.use(handleException);
 
 const startApp = async () => {
   if (!process.env.DATABASE_URL) {
     throw new Error("DATABASE_URL is not defined!");
+  }
+
+  if (!process.env.JWT_RSA_PRIVATE_KEY) {
+    throw new Error("JWT_RSA_PRIVATE_KEY is not defined!");
+  }
+
+  if (!process.env.JWT_RSA_PUBLIC_KEY) {
+    throw new Error("JWT_RSA_PUBLIC_KEY is not defined!");
   }
 
   try {
@@ -31,5 +43,4 @@ const startApp = async () => {
     console.info(`App port: ${appPort}`);
   });
 };
-
 startApp();
