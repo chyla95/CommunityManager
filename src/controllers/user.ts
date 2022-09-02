@@ -27,7 +27,7 @@ export const signInUser = async (req: Request, res: Response, next: NextFunction
     return next(new BadRequestError("Invalid Credentials!"));
   }
 
-  const isPasswordValid = user.isPasswordValid(password);
+  const isPasswordValid = await user.isPasswordValid(password);
   if (!isPasswordValid) {
     return next(new BadRequestError("Invalid Credentials!"));
   }
