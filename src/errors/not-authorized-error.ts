@@ -3,11 +3,11 @@ import { CustomError } from "./custom-error";
 export class NotAuthorizedError extends CustomError {
   readonly statusCode = 401;
 
-  constructor() {
-    super("Not Authorized!");
+  constructor(message: string = "Not Authorized!") {
+    super(message);
   }
 
   serializeErrors() {
-    return [{ message: "Not Authorized!" }];
+    return [{ message: this.message }];
   }
 }

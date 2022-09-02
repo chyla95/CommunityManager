@@ -3,11 +3,11 @@ import { CustomError } from "./custom-error";
 export class BadRequestError extends CustomError {
   readonly statusCode = 400;
 
-  constructor() {
-    super("Bad Request!");
+  constructor(message: string = "Bad Request!") {
+    super(message);
   }
 
   serializeErrors() {
-    return [{ message: "Bad Request!" }];
+    return [{ message: this.message }];
   }
 }

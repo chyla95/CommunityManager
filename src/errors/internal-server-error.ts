@@ -3,11 +3,11 @@ import { CustomError } from "./custom-error";
 export class InternalServerError extends CustomError {
   readonly statusCode = 500;
 
-  constructor() {
-    super("Internal Server Error!");
+  constructor(message: string = "Internal Server Error!") {
+    super(message);
   }
 
   serializeErrors() {
-    return [{ message: "Internal Server Error!" }];
+    return [{ message: this.message }];
   }
 }
