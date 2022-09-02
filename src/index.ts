@@ -1,14 +1,14 @@
 import express from "express";
 import mongoose from "mongoose";
+import passport from "passport";
 
 import { handleException } from "./middlewares/handle-exception";
 import { validateRoute } from "./middlewares/validate-route";
 import { router as userRouter } from "./routes/user";
 
-//verifyJWT(passport);
-//passport.initialize();
-
 const app = express();
+
+passport.initialize();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
