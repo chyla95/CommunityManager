@@ -3,6 +3,7 @@ import { Password } from "../services/password";
 
 const schemaOptions: mongoose.SchemaOptions = {
   timestamps: true,
+  versionKey: false,
   toJSON: {
     virtuals: true,
     transform(doc, ret) {
