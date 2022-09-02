@@ -9,7 +9,7 @@ import { authenticate } from "../middlewares/authenticate";
 // Controller: SignUp
 export const signUpUser = [
   body("email", "Please enter a valid e-mail adress.").isEmail().normalizeEmail(),
-  body("password", "Please enter a valid password - alphanumeric, at least 6 characters.").isAlphanumeric().isLength({ min: 6 }),
+  body("password", "Please enter a valid password. Password has to be alphanumeric and at least 6 characters long.").isAlphanumeric().isLength({ min: 6 }),
   validateRequest,
   async (req: Request, res: Response, next: NextFunction) => {
     const { email, password } = req.body;
