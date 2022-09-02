@@ -12,7 +12,7 @@ export const signUpUser = async (req: Request, res: Response, next: NextFunction
     return next(new BadRequestError("Invalid Credentials!"));
   }
 
-  const user = (await User.create({ email: email, password: password })) as User;
+  const user = await User.create({ email: email, password: password });
   const jwt = issueJwt(user);
 
   res.status(201).send({ user, jwt });
@@ -22,7 +22,7 @@ export const signUpUser = async (req: Request, res: Response, next: NextFunction
 export const signInUser = async (req: Request, res: Response, next: NextFunction) => {
   const { email, password } = req.body;
 
-  const user = (await User.findOne({ email: email })) as User;
+  const user = await User.findOne({ email: email });
   if (!user) {
     return next(new BadRequestError("Invalid Credentials!"));
   }
@@ -43,7 +43,7 @@ export const getCurrentUser = async (req: Request, res: Response, next: NextFunc
     return next(new BadRequestError("No User Is Logged In!"));
   }
 
-  const user = (await User.findOne({ _id: req.user.id })) as User;
+  const user = await User.findOne({ _id: req.user.id });
   if (!user) {
     return next(new BadRequestError("User Not Found!"));
   }
