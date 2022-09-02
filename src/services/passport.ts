@@ -13,7 +13,7 @@ const strategyOptions = {
 passport.use(
   new Strategy(strategyOptions, async (payload, done) => {
     try {
-      const user = await User.findOne({ id: payload.userId });
+      const user = await User.findOne({ _id: payload.userId });
       if (!user) {
         return done(null, false);
       }
