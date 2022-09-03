@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import passport from "passport";
 
 import { handleException } from "./middlewares/handle-exception";
-import { validateRoute } from "./middlewares/validate-route";
+import { handleInvalidRoute } from "./middlewares/handle-invalid-route";
 import { router as userRouter } from "./routes/user";
 
 const app = express();
@@ -15,7 +15,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(userRouter);
 app.use("/api/user", userRouter);
-app.use(validateRoute);
+app.use(handleInvalidRoute);
 app.use(handleException);
 
 const startApp = async () => {
