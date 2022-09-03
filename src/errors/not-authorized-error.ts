@@ -1,7 +1,8 @@
-import { CustomError } from "./custom-error";
+import { ErrorBase } from "./error-base";
 
-export class NotAuthorizedError extends CustomError {
+export class NotAuthorizedError extends ErrorBase {
   readonly statusCode = 401;
+  readonly isOperational = true;
 
   constructor(message: string = "Not Authorized!") {
     super(message);

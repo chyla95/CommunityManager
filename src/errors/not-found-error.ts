@@ -1,7 +1,8 @@
-import { CustomError } from "./custom-error";
+import { ErrorBase } from "./error-base";
 
-export class NotFoundError extends CustomError {
+export class NotFoundError extends ErrorBase {
   readonly statusCode = 404;
+  readonly isOperational = true;
 
   constructor(message: string = "Not Found!") {
     super(message);
