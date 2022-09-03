@@ -55,11 +55,6 @@ export const getCurrentUser = [
       return next(new BadRequestError("No User Is Logged In!"));
     }
 
-    const user = await User.findOne({ _id: req.user.id });
-    if (!user) {
-      return next(new BadRequestError("User Not Found!"));
-    }
-
-    res.status(200).send({ user });
+    res.status(200).send({ user: req.user });
   },
 ];
