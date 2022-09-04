@@ -4,7 +4,7 @@ import { User } from "../models/user";
 import { issueJwt } from "../services/passport";
 import { BadRequestError } from "../errors/bad-request-error";
 import { validateRequestFields } from "../middlewares/validate-request";
-import { authenticate } from "../middlewares/authenticate";
+import { authenticateUser } from "../middlewares/authenticate-user";
 
 // Controller: SignUp
 export const signUpUser = [
@@ -50,7 +50,7 @@ export const signInUser = [
 
 // Controller: GetCurrentUser
 export const getCurrentUser = [
-  authenticate,
+  authenticateUser,
   async (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
       return next(new BadRequestError("No User Is Logged In!"));
