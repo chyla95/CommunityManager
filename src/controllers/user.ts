@@ -3,14 +3,15 @@ import { body } from "express-validator";
 import { User } from "../models/user";
 import { issueJwt } from "../services/passport";
 import { BadRequestError } from "../errors/bad-request-error";
-import { validateRequest } from "../middlewares/validate-request";
+import { validateRequestFields } from "../middlewares/validate-request";
 import { authenticate } from "../middlewares/authenticate";
 
 // Controller: SignUp
 export const signUpUser = [
-  body("email", "Please enter a valid e-mail adress.").isEmail().normalizeEmail(),
-  body("password", "Please enter a valid password. Password has to be alphanumeric and at least 6 characters long.").isAlphanumeric().isLength({ min: 6 }),
-  validateRequest,
+  validateRequestFields([
+    body("email", "Please enter a valid e-mail adress.").isEmail().normalizeEmail(),
+    body("password", "Please enter a valid password. Password has to be alphanumeric and at least 6 characters long.").isAlphanumeric().isLength({ min: 6 }),
+  ]),
   async (req: Request, res: Response, next: NextFunction) => {
     const { email, password } = req.body;
 
