@@ -1,11 +1,14 @@
 import mongoose from "mongoose";
 import { Password } from "../services/password";
+import { IRole, Permissions } from "./role";
 
 export interface IUser extends mongoose.Document {
   email: string;
   password: string;
+  roles: IRole[];
 
   isPasswordValid: (password: string) => Promise<boolean>;
+  hasPermission: (permission: Permissions) => Promise<boolean>;
 }
 
 const schemaOptions: mongoose.SchemaOptions = {
@@ -24,6 +27,12 @@ const schema = new mongoose.Schema<IUser>(
   {
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    roles: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Role",
+      },
+    ],
   },
   schemaOptions
 );
@@ -41,4 +50,34 @@ schema.methods.isPasswordValid = async function (password: string) {
   return isPasswordValid;
 };
 
+schema.methods.hasPermission = async function (permission: Permissions) {
+  let hasPermission = false;
+
+  for (const role of this.roles as IRole[]) {
+    switch (permission) {
+      case Permissions.ManageUsers: {
+        if (role.permissions.users.manage === true) {
+          hasPermission = true;
+        }
+        break;
+      }
+      case Permissions.ManageRoles: {
+        if (role.permissions.roles.manage === true) {
+          hasPermission = true;
+        }
+        break;
+      }
+      default: {
+        // TODO: Change/Implement to "SystemError"
+        throw new Error("Permission Cannot Be Handled - Not Implemented Or Not Mapped.");
+      }
+    }
+    if (hasPermission) break;
+  }
+
+  return hasPermission;
+};
+
 export const User = mongoose.model<IUser>("User", schema);
+
+// End of mongoose model
