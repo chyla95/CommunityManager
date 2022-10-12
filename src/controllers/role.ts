@@ -43,25 +43,29 @@ export const createRole = [
   },
 ];
 
+// Controller: GetRoles
+export const getRoles = [
+  authenticateUser,
+  async (req: Request, res: Response, next: NextFunction) => {
+    const role = await Role.find({});
+
+    res.status(201).send(role);
+  },
+];
+
 // Controller: GetRole
 export const getRole = [
   authenticateUser,
   validateRequest([param("roleId").optional().isMongoId()]),
   async (req: Request, res: Response, next: NextFunction) => {
     const roleId = req.params.roleId;
-    let roles: IRole[] = [];
 
-    if (roleId) {
-      const role = await Role.findOne({ _id: roleId });
-      if (!role) {
-        return next(new NotFoundError("Role Not Found!"));
-      }
-      roles.push(role);
-    } else {
-      roles = await Role.find({});
+    const role = await Role.findOne({ _id: roleId });
+    if (!role) {
+      return next(new NotFoundError("Role Not Found!"));
     }
 
-    res.status(201).send(roles);
+    res.status(201).send(role);
   },
 ];
 
