@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { body, param } from "express-validator";
 import { BadRequestError } from "../errors/bad-request-error";
-import { validateRequest, handleValidationErrors } from "../middlewares/validate-request";
+import { validateRequest } from "../middlewares/validate-request";
 import { authenticateUser } from "../middlewares/authenticate-user";
 import { Role, IRole } from "../models/role";
 import { authorizeUser } from "../middlewares/authorize-user";
