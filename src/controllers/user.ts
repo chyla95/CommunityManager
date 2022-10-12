@@ -3,21 +3,23 @@ import { body } from "express-validator";
 import { User } from "../models/user";
 import { issueJwt } from "../services/passport";
 import { BadRequestError } from "../errors/bad-request-error";
-import { validateRequestFields } from "../middlewares/validate-request";
+import { validateRequest } from "../middlewares/validate-request";
 import { authenticateUser } from "../middlewares/authenticate-user";
+
+const userCredentialValidationRules = [
+  body("email", "Invalid e-mail adress.").isEmail().normalizeEmail(),
+  body("password", "Password has to be between 5 and 50 characters long.").isLength({ min: 5, max: 50 }),
+];
 
 // Controller: SignUp
 export const signUpUser = [
-  validateRequestFields([
-    body("email", "Please enter a valid e-mail adress.").isEmail().normalizeEmail(),
-    body("password", "Please enter a valid password. Password has to be alphanumeric and at least 6 characters long.").isAlphanumeric().isLength({ min: 6 }),
-  ]),
+  validateRequest(userCredentialValidationRules),
   async (req: Request, res: Response, next: NextFunction) => {
     const { email, password } = req.body;
 
-    const doesUserExist = await User.findOne({ email: email });
-    if (doesUserExist) {
-      return next(new BadRequestError("Invalid Credentials!"));
+    const isEmailTaken = await User.findOne({ email: email });
+    if (isEmailTaken) {
+      return next(new BadRequestError("This Email Is Taken!"));
     }
 
     const user = await User.create({ email: email, password: password });
@@ -29,6 +31,7 @@ export const signUpUser = [
 
 // Controller: SignIn
 export const signInUser = [
+  validateRequest(userCredentialValidationRules),
   async (req: Request, res: Response, next: NextFunction) => {
     const { email, password } = req.body;
 
@@ -52,10 +55,11 @@ export const signInUser = [
 export const getCurrentUser = [
   authenticateUser,
   async (req: Request, res: Response, next: NextFunction) => {
-    if (!req.user) {
+    const user = req.user;
+    if (!user) {
       return next(new BadRequestError("No User Is Logged In!"));
     }
 
-    res.status(200).send({ user: req.user });
+    res.status(200).send({ user });
   },
 ];
