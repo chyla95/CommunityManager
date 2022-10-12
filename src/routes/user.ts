@@ -3,6 +3,7 @@ import * as userController from "../controllers/user";
 
 export const router = Router();
 
-router.post("/signUp", userController.signUpUser);
-router.post("/signIn", userController.signInUser);
-router.get("/getCurrentUser", userController.getCurrentUser);
+// Auth
+router.post("/auth/signUp", userController.signUpUser);
+router.post("/auth/signIn", userController.signInUser);
+router.get("/auth/currentUser", userController.getCurrentUser);
