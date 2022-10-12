@@ -19,7 +19,7 @@ const roleBodyValidationRules = [
 export const createRole = [
   authenticateUser,
   authorizeUser([Permissions.RolesManageAll]),
-  validateRequest(roleBodyValidationRules),
+  validateRequest([...roleBodyValidationRules]),
   async (req: Request, res: Response, next: NextFunction) => {
     const { name, permissions } = req.body;
 
@@ -40,8 +40,7 @@ export const createRole = [
 // Controller: GetRole
 export const getRole = [
   authenticateUser,
-  param("roleId").optional().isMongoId(),
-  handleValidationErrors,
+  validateRequest([param("roleId").optional().isMongoId()]),
   async (req: Request, res: Response, next: NextFunction) => {
     const roleId = req.params.roleId;
     let roles: IRole[] = [];
@@ -64,9 +63,7 @@ export const getRole = [
 export const updateRole = [
   authenticateUser,
   authorizeUser([Permissions.RolesManageAll]),
-  validateRequest(roleBodyValidationRules),
-  param("roleId").isMongoId(),
-  handleValidationErrors,
+  validateRequest([...roleBodyValidationRules, param("roleId").isMongoId()]),
   async (req: Request, res: Response, next: NextFunction) => {
     const { name, permissions } = req.body;
     const roleId = req.params.roleId;
@@ -93,8 +90,7 @@ export const updateRole = [
 export const deleteRole = [
   authenticateUser,
   authorizeUser([Permissions.RolesManageAll]),
-  param("roleId").isMongoId(),
-  handleValidationErrors,
+  validateRequest([param("roleId").isMongoId()]),
   async (req: Request, res: Response, next: NextFunction) => {
     const roleId = req.params.roleId;
 
