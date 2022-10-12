@@ -13,5 +13,5 @@ export const handleValidationErrors = (req: Request, res: Response, next: NextFu
 };
 
 export const validateRequest = (rules: ValidationChain[]) => {
-  return Router().use(...rules, handleValidationErrors);
+  return Router({ mergeParams: true }).use(...rules, handleValidationErrors);
 };
