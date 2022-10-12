@@ -4,10 +4,10 @@ export interface IRole extends mongoose.Document {
   name: string;
   permissions: {
     users: {
-      manage: boolean;
+      manageAll: boolean;
     };
     roles: {
-      manage: boolean;
+      manageAll: boolean;
     };
   };
 }
@@ -23,16 +23,16 @@ const schemaOptions: mongoose.SchemaOptions = {
   },
 };
 
+// Naming: manageAll / manageOwn
 const schema = new mongoose.Schema<IRole>(
   {
     name: { type: String, required: true, unique: true },
     permissions: {
       users: {
-        manage: { type: Boolean },
-        // TODO: manageAll vs manageOwn vs manageSelf
+        manageAll: { type: Boolean },
       },
       roles: {
-        manage: { type: Boolean },
+        manageAll: { type: Boolean },
       },
     },
   },
@@ -44,6 +44,6 @@ export const Role = mongoose.model<IRole>("Role", schema);
 // End of mongoose model
 
 export enum Permissions {
-  ManageUsers,
-  ManageRoles,
+  UsersManageAll,
+  RolesManageAll,
 }

@@ -55,14 +55,14 @@ schema.methods.hasPermission = async function (permission: Permissions) {
 
   for (const role of this.roles as IRole[]) {
     switch (permission) {
-      case Permissions.ManageUsers: {
-        if (role.permissions.users.manage === true) {
+      case Permissions.UsersManageAll: {
+        if (role.permissions.users.manageAll === true) {
           hasPermission = true;
         }
         break;
       }
-      case Permissions.ManageRoles: {
-        if (role.permissions.roles.manage === true) {
+      case Permissions.RolesManageAll: {
+        if (role.permissions.roles.manageAll === true) {
           hasPermission = true;
         }
         break;
