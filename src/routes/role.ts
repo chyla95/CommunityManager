@@ -10,5 +10,5 @@ router.delete("/user", roleController.retractRole);
 // Roles
 router.post("/", roleController.createRole);
 router.get("/:roleId?", roleController.getRole);
-router.put("/:roleId?", roleController.updateRole);
-router.delete("/:roleId?", roleController.deleteRole);
+router.put("/:roleId", roleController.updateRole);
+router.delete("/:roleId", roleController.deleteRole);
