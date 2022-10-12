@@ -11,6 +11,9 @@ import { NotFoundError } from "../errors/not-found-error";
 
 const roleBodyValidationRules = [
   body("name").isAlphanumeric("en-US", { ignore: " " }).isLength({ min: 3 }).trim(),
+  body("hasFullSystemAccess").optional().isBoolean(),
+  body("hierarchyLevel").isInt(),
+  body("decorationColor").isHexColor(),
   body("permissions.users.manageAll").optional().isBoolean(),
   body("permissions.roles.manageAll").optional().isBoolean(),
 ];
@@ -21,7 +24,7 @@ export const createRole = [
   authorizeUser([Permissions.RolesManageAll]),
   validateRequest([...roleBodyValidationRules]),
   async (req: Request, res: Response, next: NextFunction) => {
-    const { name, permissions } = req.body;
+    const { name, hasFullSystemAccess, hierarchyLevel, decorationColor, permissions } = req.body;
 
     const isRoleNameTaken = await Role.findOne({ name: name });
     if (isRoleNameTaken) {
@@ -30,6 +33,9 @@ export const createRole = [
 
     const role = await Role.create({
       name: name,
+      hasFullSystemAccess: hasFullSystemAccess,
+      hierarchyLevel: hierarchyLevel,
+      decorationColor: decorationColor,
       permissions: permissions,
     });
 
@@ -65,7 +71,7 @@ export const updateRole = [
   authorizeUser([Permissions.RolesManageAll]),
   validateRequest([...roleBodyValidationRules, param("roleId").isMongoId()]),
   async (req: Request, res: Response, next: NextFunction) => {
-    const { name, permissions } = req.body;
+    const { name, hasFullSystemAccess, hierarchyLevel, decorationColor, permissions } = req.body;
     const roleId = req.params.roleId;
 
     const role = await Role.findOne({ _id: roleId });
@@ -79,6 +85,9 @@ export const updateRole = [
     }
 
     role.name = name;
+    role.hasFullSystemAccess = hasFullSystemAccess;
+    role.hierarchyLevel = hierarchyLevel;
+    role.decorationColor = decorationColor;
     role.permissions = permissions;
     await role.save();
 

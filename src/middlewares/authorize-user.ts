@@ -9,8 +9,10 @@ export const authorizeUser = (permissions: Permissions[]) => {
     }
 
     for (const permission of permissions) {
-      const hasPermission = await req.user.hasPermission(permission);
-      if (!hasPermission) {
+      const hasPermission = req.user.hasPermission(permission);
+      const hasFullSystemAccess = req.user.hasFullSystemAccess();
+
+      if (!hasFullSystemAccess && !hasPermission) {
         return next(new NotAuthorizedError("You Are Missing Permissions."));
       }
     }

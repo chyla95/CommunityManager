@@ -1,7 +1,11 @@
 import mongoose from "mongoose";
+import { isHexColor } from "../utilities/validators/is-hex-color";
 
 export interface IRole extends mongoose.Document {
   name: string;
+  hasFullSystemAccess: boolean;
+  hierarchyLevel: number;
+  decorationColor: string;
   permissions: {
     users: {
       manageAll: boolean;
@@ -27,6 +31,9 @@ const schemaOptions: mongoose.SchemaOptions = {
 const schema = new mongoose.Schema<IRole>(
   {
     name: { type: String, required: true, unique: true },
+    hasFullSystemAccess: { type: Boolean },
+    hierarchyLevel: { type: Number, required: true, validate: [Number.isInteger, 'Invalid "hierarchyLevel" Value!'] },
+    decorationColor: { type: String, required: true, validate: [isHexColor, 'Invalid "decorationColor" Value!'] },
     permissions: {
       users: {
         manageAll: { type: Boolean },

@@ -8,7 +8,8 @@ export interface IUser extends mongoose.Document {
   roles: IRole[];
 
   isPasswordValid: (password: string) => Promise<boolean>;
-  hasPermission: (permission: Permissions) => Promise<boolean>;
+  hasFullSystemAccess: () => boolean;
+  hasPermission: (permission: Permissions) => boolean;
 }
 
 const schemaOptions: mongoose.SchemaOptions = {
@@ -50,7 +51,20 @@ schema.methods.isPasswordValid = async function (password: string) {
   return isPasswordValid;
 };
 
-schema.methods.hasPermission = async function (permission: Permissions) {
+schema.methods.hasFullSystemAccess = function () {
+  let hasPermission = false;
+
+  for (const role of this.roles as IRole[]) {
+    if (role.hasFullSystemAccess) {
+      hasPermission = true;
+      break;
+    }
+  }
+
+  return hasPermission;
+};
+
+schema.methods.hasPermission = function (permission: Permissions) {
   let hasPermission = false;
 
   for (const role of this.roles as IRole[]) {
