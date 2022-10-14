@@ -18,11 +18,11 @@ export interface IRole extends mongoose.Document {
 
 const schemaOptions: mongoose.SchemaOptions = {
   timestamps: true,
-  versionKey: false,
   toJSON: {
     virtuals: true,
     transform(doc, ret) {
       delete ret._id;
+      delete ret.__v;
     },
   },
 };

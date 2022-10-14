@@ -1,39 +1,46 @@
 import mongoose from "mongoose";
 import { Password } from "../services/password";
-import { IRole, Permissions } from "./role";
+import { isEmail } from "../utilities/validators/is-email";
+import { isHashtagTag } from "../utilities/validators/is-hashtag-tag";
+import { isUrl } from "../utilities/validators/is-url";
 
 export interface IUser extends mongoose.Document {
   email: string;
   password: string;
-  roles: IRole[];
+  avatarImage: string;
+  discordTag: string;
+  battleTag: string;
+  status: string;
 
   isPasswordValid: (password: string) => Promise<boolean>;
-  hasFullSystemAccess: () => boolean;
-  hasPermission: (permission: Permissions) => boolean;
+}
+
+export enum AccountStatus {
+  Active = "Active",
+  Suspended = "Suspended",
 }
 
 const schemaOptions: mongoose.SchemaOptions = {
   timestamps: true,
-  versionKey: false,
+  discriminatorKey: "User",
   toJSON: {
     virtuals: true,
     transform(doc, ret) {
       delete ret._id;
       delete ret.password;
+      delete ret.__v;
     },
   },
 };
 
 const schema = new mongoose.Schema<IUser>(
   {
-    email: { type: String, required: true, unique: true },
+    email: { type: String, required: true, unique: true, validate: [isEmail, 'Invalid "email" Value!'] },
     password: { type: String, required: true },
-    roles: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Role",
-      },
-    ],
+    avatarImage: { type: String, validate: [isUrl, 'Invalid "avatarImage" Value!'] },
+    discordTag: { type: String, validate: [isHashtagTag, 'Invalid "discordTag" Value!'] },
+    battleTag: { type: String, validate: [isHashtagTag, 'Invalid "battleTag" Value!'] },
+    status: { type: String, required: true, enum: AccountStatus, default: AccountStatus.Active },
   },
   schemaOptions
 );
@@ -51,47 +58,4 @@ schema.methods.isPasswordValid = async function (password: string) {
   return isPasswordValid;
 };
 
-schema.methods.hasFullSystemAccess = function () {
-  let hasPermission = false;
-
-  for (const role of this.roles as IRole[]) {
-    if (role.hasFullSystemAccess) {
-      hasPermission = true;
-      break;
-    }
-  }
-
-  return hasPermission;
-};
-
-schema.methods.hasPermission = function (permission: Permissions) {
-  let hasPermission = false;
-
-  for (const role of this.roles as IRole[]) {
-    switch (permission) {
-      case Permissions.UsersManageAll: {
-        if (role.permissions.users.manageAll === true) {
-          hasPermission = true;
-        }
-        break;
-      }
-      case Permissions.RolesManageAll: {
-        if (role.permissions.roles.manageAll === true) {
-          hasPermission = true;
-        }
-        break;
-      }
-      default: {
-        // TODO: Change/Implement to "SystemError"
-        throw new Error("Permission Cannot Be Handled - Not Implemented Or Not Mapped.");
-      }
-    }
-    if (hasPermission) break;
-  }
-
-  return hasPermission;
-};
-
 export const User = mongoose.model<IUser>("User", schema);
-
-// End of mongoose model
