@@ -3,9 +3,9 @@ import * as roleController from "../controllers/role";
 
 export const router = Router();
 
-// Roles To Users
-router.post("/user", roleController.assignRole);
-router.delete("/user", roleController.retractRole);
+// Roles To Employee
+router.post("/employee", roleController.assignRole);
+router.delete("/employee", roleController.retractRole);
 
 // Roles
 router.post("/", roleController.createRole);

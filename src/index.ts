@@ -6,7 +6,7 @@ import { handleException } from "./middlewares/handle-exception";
 import { handleInvalidRoute } from "./middlewares/handle-invalid-route";
 import { router as userRouter } from "./routes/user";
 import { router as roleRouter } from "./routes/role";
-import { router as staffRouter } from "./routes/staff";
+import { router as employeeRouter } from "./routes/employee";
 
 const app = express();
 
@@ -15,9 +15,8 @@ passport.initialize();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(userRouter);
 app.use("/api/user", userRouter);
-app.use("/api/staff", staffRouter);
+app.use("/api/employee", employeeRouter);
 app.use("/api/role", roleRouter);
 app.use(handleInvalidRoute);
 app.use(handleException);

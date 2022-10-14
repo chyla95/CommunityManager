@@ -3,7 +3,7 @@ import { User, IUser } from "./user";
 import { IRole, Permissions } from "./role";
 import { isHashtagTag } from "../utilities/validators/is-hashtag-tag";
 
-export interface IStaff extends IUser {
+export interface IEmployee extends IUser {
   // discordTag: string;
   // battleTag: string;
   description: string;
@@ -13,7 +13,7 @@ export interface IStaff extends IUser {
   hasPermission: (permission: Permissions) => boolean;
 }
 
-const schema = new mongoose.Schema<IStaff>({
+const schema = new mongoose.Schema<IEmployee>({
   // discordTag: { type: String, required: true, unique: true, validate: [isHashtagTag, 'Invalid "discordTag" Value!'] },
   // battleTag: { type: String, required: true, unique: true, validate: [isHashtagTag, 'Invalid "battleTag" Value!'] },
   description: { type: String },
@@ -66,4 +66,4 @@ schema.methods.hasPermission = function (permission: Permissions) {
   return hasPermission;
 };
 
-export const Staff = User.discriminator<IStaff>("Staff", schema);
+export const Employee = User.discriminator<IEmployee>("Employee", schema);

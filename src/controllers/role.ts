@@ -4,10 +4,10 @@ import { BadRequestError } from "../errors/bad-request-error";
 import { validateRequest } from "../middlewares/validate-request";
 import { authenticateUser } from "../middlewares/authenticate-user";
 import { Role } from "../models/role";
-import { authorizeStaff } from "../middlewares/authorize-staff";
+import { authorizeEmployee } from "../middlewares/authorize-employee";
 import { Permissions } from "../models/role";
 import { NotFoundError } from "../errors/not-found-error";
-import { Staff } from "../models/staff";
+import { Employee } from "../models/employee";
 
 const roleBodyValidationRules = [
   body("name").isAlphanumeric("en-US", { ignore: " " }).isLength({ min: 3 }).trim(),
@@ -21,7 +21,7 @@ const roleBodyValidationRules = [
 // Controller: CreateRole
 export const createRole = [
   authenticateUser,
-  authorizeStaff([Permissions.RolesManageAll]),
+  authorizeEmployee([Permissions.RolesManageAll]),
   validateRequest([...roleBodyValidationRules]),
   async (req: Request, res: Response, next: NextFunction) => {
     const { name, hasFullSystemAccess, hierarchyLevel, decorationColor, permissions } = req.body;
@@ -46,7 +46,7 @@ export const createRole = [
 // Controller: GetRoles
 export const getRoles = [
   authenticateUser,
-  authorizeStaff([]),
+  authorizeEmployee([]),
   async (req: Request, res: Response, next: NextFunction) => {
     const role = await Role.find({});
 
@@ -57,7 +57,7 @@ export const getRoles = [
 // Controller: GetRole
 export const getRole = [
   authenticateUser,
-  authorizeStaff([]),
+  authorizeEmployee([]),
   validateRequest([param("roleId").optional().isMongoId()]),
   async (req: Request, res: Response, next: NextFunction) => {
     const roleId = req.params.roleId;
@@ -74,7 +74,7 @@ export const getRole = [
 // Controller: UpdateRole
 export const updateRole = [
   authenticateUser,
-  authorizeStaff([Permissions.RolesManageAll]),
+  authorizeEmployee([Permissions.RolesManageAll]),
   validateRequest([...roleBodyValidationRules, param("roleId").isMongoId()]),
   async (req: Request, res: Response, next: NextFunction) => {
     const { name, hasFullSystemAccess, hierarchyLevel, decorationColor, permissions } = req.body;
@@ -104,7 +104,7 @@ export const updateRole = [
 // Controller: DeleteRole
 export const deleteRole = [
   authenticateUser,
-  authorizeStaff([Permissions.RolesManageAll]),
+  authorizeEmployee([Permissions.RolesManageAll]),
   validateRequest([param("roleId").isMongoId()]),
   async (req: Request, res: Response, next: NextFunction) => {
     const roleId = req.params.roleId;
@@ -123,14 +123,14 @@ export const deleteRole = [
 // Controller: assignRole
 export const assignRole = [
   authenticateUser,
-  authorizeStaff([Permissions.UsersManageAll, Permissions.RolesManageAll]),
-  validateRequest([body("staffId").isMongoId(), body("roleId").isMongoId()]),
+  authorizeEmployee([Permissions.UsersManageAll, Permissions.RolesManageAll]),
+  validateRequest([body("employeeId").isMongoId(), body("roleId").isMongoId()]),
   async (req: Request, res: Response, next: NextFunction) => {
-    const { staffId, roleId } = req.body;
+    const { employeeId, roleId } = req.body;
 
-    const staff = await Staff.findOne({ _id: staffId }).populate("roles");
-    if (!staff) {
-      return next(new BadRequestError("This User Doesn't Exists!"));
+    const employee = await Employee.findOne({ _id: employeeId }).populate("roles");
+    if (!employee) {
+      return next(new BadRequestError("This Employee Doesn't Exists!"));
     }
 
     const role = await Role.findOne({ _id: roleId });
@@ -138,31 +138,31 @@ export const assignRole = [
       return next(new BadRequestError("This Role Doesn't Exists!"));
     }
 
-    const doesStaffHasRole = staff.roles.find((r) => {
+    const doesEmployeeHasRole = employee.roles.find((r) => {
       return r.id == role.id;
     });
-    if (doesStaffHasRole) {
-      return next(new BadRequestError("User Already Has This Role!"));
+    if (doesEmployeeHasRole) {
+      return next(new BadRequestError("Employee Already Has This Role!"));
     }
 
-    staff.roles.push(role);
-    await staff.save();
+    employee.roles.push(role);
+    await employee.save();
 
-    res.status(201).send(staff);
+    res.status(201).send(employee);
   },
 ];
 
 // Controller: RetractRole
 export const retractRole = [
   authenticateUser,
-  authorizeStaff([Permissions.UsersManageAll, Permissions.RolesManageAll]),
-  validateRequest([body("staffId").isMongoId(), body("roleId").isMongoId()]),
+  authorizeEmployee([Permissions.UsersManageAll, Permissions.RolesManageAll]),
+  validateRequest([body("employeeId").isMongoId(), body("roleId").isMongoId()]),
   async (req: Request, res: Response, next: NextFunction) => {
-    const { staffId, roleId } = req.body;
+    const { employeeId, roleId } = req.body;
 
-    const staff = await Staff.findOne({ _id: staffId }).populate("roles");
-    if (!staff) {
-      return next(new BadRequestError("This User Doesn't Exists!"));
+    const employee = await Employee.findOne({ _id: employeeId }).populate("roles");
+    if (!employee) {
+      return next(new BadRequestError("This Employee Doesn't Exists!"));
     }
 
     const role = await Role.findOne({ _id: roleId });
@@ -170,17 +170,17 @@ export const retractRole = [
       return next(new BadRequestError("This Role Doesn't Exists!"));
     }
 
-    const doesStaffHasRole = staff.roles.find((r) => {
+    const doesEmployeeHasRole = employee.roles.find((r) => {
       return r.id == role.id;
     });
-    if (!doesStaffHasRole) {
-      return next(new BadRequestError("User Doesn't have This Role!"));
+    if (!doesEmployeeHasRole) {
+      return next(new BadRequestError("Employee Doesn't have This Role!"));
     }
 
-    staff.roles = staff.roles.filter((r) => {
+    employee.roles = employee.roles.filter((r) => {
       return r.id !== role.id;
     });
-    await staff.save();
+    await employee.save();
 
     res.status(204).send();
   },
