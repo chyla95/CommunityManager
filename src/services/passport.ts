@@ -13,7 +13,7 @@ const strategyOptions = {
 passport.use(
   new Strategy(strategyOptions, async (payload, done) => {
     try {
-      const user = await User.findOne({ _id: payload.userId }).populate("roles");
+      const user = await User.findOne({ _id: payload.userId });
       if (!user) {
         return done(null, false);
       }
@@ -40,7 +40,7 @@ export const issueJwt = (user: IUser) => {
   };
 };
 
-// Extending "req.user" with "IUser" properties
+// Extends "req.user" with "IUser" properties
 declare global {
   namespace Express {
     interface User extends IUser {}
