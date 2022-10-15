@@ -6,22 +6,30 @@ import { Permissions } from "../models/role";
 
 export const authorizeEmployee = (permissions: Permissions[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
-    if (!req.user) {
+    const user = req.user;
+    if (!user) {
       return next(new NotAuthorizedError("You Are Not Signed In!"));
     }
 
-    const employee = await Employee.findOne({ _id: req.user.id }).populate("roles");
+    const employee = await Employee.findOne({ _id: user.id }).populate("user").populate("roles");
     if (!employee) {
       return next(new NotFoundError("You Are Not an Employee!"));
     }
 
+    const hasFullSystemAccess = employee.hasFullSystemAccess();
+    if (hasFullSystemAccess) {
+      req.employee = employee;
+      return next();
+    }
+
+    const missingPermissions: string[] = [];
     for (const permission of permissions) {
       const hasPermission = employee.hasPermission(permission);
-      const hasFullSystemAccess = employee.hasFullSystemAccess();
+      if (!hasPermission) missingPermissions.push(permission);
+    }
 
-      if (!hasFullSystemAccess && !hasPermission) {
-        return next(new NotAuthorizedError("You Are Missing Permissions!"));
-      }
+    if (missingPermissions.length > 0) {
+      return next(new NotAuthorizedError("You Are Missing Following Permissions: " + missingPermissions + "!"));
     }
 
     req.employee = employee;

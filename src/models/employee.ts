@@ -1,29 +1,45 @@
 import mongoose from "mongoose";
-import { User, IUser } from "./user";
+import { IUser } from "./user";
 import { IRole, Permissions } from "./role";
-import { isHashtagTag } from "../utilities/validators/is-hashtag-tag";
 
 export interface IEmployee extends IUser {
-  // discordTag: string;
-  // battleTag: string;
-  description: string;
+  user: IUser;
   roles: IRole[];
+  description: string;
 
   hasFullSystemAccess: () => boolean;
   hasPermission: (permission: Permissions) => boolean;
 }
 
-const schema = new mongoose.Schema<IEmployee>({
-  // discordTag: { type: String, required: true, unique: true, validate: [isHashtagTag, 'Invalid "discordTag" Value!'] },
-  // battleTag: { type: String, required: true, unique: true, validate: [isHashtagTag, 'Invalid "battleTag" Value!'] },
-  description: { type: String },
-  roles: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Role",
+const schemaOptions: mongoose.SchemaOptions = {
+  timestamps: true,
+  toJSON: {
+    virtuals: true,
+    transform(doc, ret) {
+      delete ret._id;
+      delete ret.__v;
     },
-  ],
-});
+  },
+};
+
+const schema = new mongoose.Schema<IEmployee>(
+  {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      unique: true,
+    },
+    roles: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Role",
+      },
+    ],
+    description: { type: String },
+  },
+  schemaOptions
+);
 
 schema.methods.hasFullSystemAccess = function () {
   let hasPermission = false;
@@ -66,4 +82,4 @@ schema.methods.hasPermission = function (permission: Permissions) {
   return hasPermission;
 };
 
-export const Employee = User.discriminator<IEmployee>("Employee", schema);
+export const Employee = mongoose.model<IEmployee>("Employee", schema);

@@ -9,6 +9,7 @@ import { Permissions } from "../models/role";
 import { NotFoundError } from "../errors/not-found-error";
 import { Employee } from "../models/employee";
 
+// Validation Rules
 const roleBodyValidationRules = [
   body("name").isAlphanumeric("en-US", { ignore: " " }).isLength({ min: 3 }).trim(),
   body("hasFullSystemAccess").optional().isBoolean(),
@@ -18,7 +19,7 @@ const roleBodyValidationRules = [
   body("permissions.roles.manageAll").optional().isBoolean(),
 ];
 
-// Controller: CreateRole
+// Controller Functions
 export const createRole = [
   authenticateUser,
   authorizeEmployee([Permissions.RolesManageAll]),
@@ -26,8 +27,7 @@ export const createRole = [
   async (req: Request, res: Response, next: NextFunction) => {
     const { name, hasFullSystemAccess, hierarchyLevel, decorationColor, permissions } = req.body;
 
-    const isRoleNameTaken = await Role.findOne({ name: name });
-    if (isRoleNameTaken) {
+    if (await isRoleNameTaken(name)) {
       return next(new BadRequestError("Role With This Name Already Exists!"));
     }
 
@@ -43,22 +43,20 @@ export const createRole = [
   },
 ];
 
-// Controller: GetRoles
 export const getRoles = [
   authenticateUser,
   authorizeEmployee([]),
   async (req: Request, res: Response, next: NextFunction) => {
     const role = await Role.find({});
 
-    res.status(201).send(role);
+    res.status(200).send(role);
   },
 ];
 
-// Controller: GetRole
 export const getRole = [
   authenticateUser,
   authorizeEmployee([]),
-  validateRequest([param("roleId").optional().isMongoId()]),
+  validateRequest([param("roleId").isMongoId()]),
   async (req: Request, res: Response, next: NextFunction) => {
     const roleId = req.params.roleId;
 
@@ -67,11 +65,10 @@ export const getRole = [
       return next(new NotFoundError("Role Not Found!"));
     }
 
-    res.status(201).send(role);
+    res.status(200).send(role);
   },
 ];
 
-// Controller: UpdateRole
 export const updateRole = [
   authenticateUser,
   authorizeEmployee([Permissions.RolesManageAll]),
@@ -85,8 +82,7 @@ export const updateRole = [
       return next(new NotFoundError("Role Not Found!"));
     }
 
-    const isRoleNameTaken = await Role.findOne({ _id: { $ne: roleId }, name: name });
-    if (isRoleNameTaken) {
+    if (await isRoleNameTaken(name, roleId)) {
       return next(new BadRequestError("Role With This Name Already Exists!"));
     }
 
@@ -97,11 +93,10 @@ export const updateRole = [
     role.permissions = permissions;
     await role.save();
 
-    res.status(201).send(role);
+    res.status(200).send(role);
   },
 ];
 
-// Controller: DeleteRole
 export const deleteRole = [
   authenticateUser,
   authorizeEmployee([Permissions.RolesManageAll]),
@@ -120,7 +115,6 @@ export const deleteRole = [
   },
 ];
 
-// Controller: assignRole
 export const assignRole = [
   authenticateUser,
   authorizeEmployee([Permissions.UsersManageAll, Permissions.RolesManageAll]),
@@ -152,7 +146,6 @@ export const assignRole = [
   },
 ];
 
-// Controller: RetractRole
 export const retractRole = [
   authenticateUser,
   authorizeEmployee([Permissions.UsersManageAll, Permissions.RolesManageAll]),
@@ -185,3 +178,17 @@ export const retractRole = [
     res.status(204).send();
   },
 ];
+
+// Helper Functions
+const isRoleNameTaken = async (roleName: string, roleId?: string) => {
+  if (!roleId) {
+    const isRoleNameTaken = await Role.findOne({ name: roleName });
+    if (isRoleNameTaken) return true;
+    return false;
+  }
+  if (roleId) {
+    const isRoleNameTaken = await Role.findOne({ _id: { $ne: roleId }, name: roleName });
+    if (isRoleNameTaken) return true;
+    return false;
+  }
+};

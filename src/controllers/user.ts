@@ -3,7 +3,6 @@ import { body } from "express-validator";
 import { issueJwt } from "../services/passport";
 import { BadRequestError } from "../errors/bad-request-error";
 import { validateRequest } from "../middlewares/validate-request";
-import { authenticateUser } from "../middlewares/authenticate-user";
 import { User } from "../models/user";
 import { isHashtagTag } from "../utilities/validators/is-hashtag-tag";
 
@@ -36,14 +35,18 @@ export const signUpUser = [
       return next(new BadRequestError("This Email Is Taken!"));
     }
 
-    const isdiscordTagTaken = await User.findOne({ discordTag: discordTag });
-    if (isdiscordTagTaken) {
-      return next(new BadRequestError("This Discord Tag Is Taken!"));
+    if (discordTag) {
+      const isdiscordTagTaken = await User.findOne({ discordTag: discordTag });
+      if (isdiscordTagTaken) {
+        return next(new BadRequestError("This Discord Tag Is Taken!"));
+      }
     }
 
-    const isbattleTagTaken = await User.findOne({ battleTag: battleTag });
-    if (isbattleTagTaken) {
-      return next(new BadRequestError("This Battle Tag Is Taken!"));
+    if (battleTag) {
+      const isbattleTagTaken = await User.findOne({ battleTag: battleTag });
+      if (isbattleTagTaken) {
+        return next(new BadRequestError("This Battle Tag Is Taken!"));
+      }
     }
 
     const user = await User.create({ email: email, password: password, discordTag: discordTag, battleTag: battleTag });
@@ -72,18 +75,5 @@ export const signInUser = [
     const jwt = issueJwt(user);
 
     res.status(200).send({ user, jwt });
-  },
-];
-
-// Controller: GetCurrentUser
-export const getCurrentUser = [
-  authenticateUser,
-  async (req: Request, res: Response, next: NextFunction) => {
-    const user = req.user;
-    if (!user) {
-      return next(new BadRequestError("No User Is Logged In!"));
-    }
-
-    res.status(200).send(user);
   },
 ];

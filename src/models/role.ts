@@ -51,6 +51,6 @@ export const Role = mongoose.model<IRole>("Role", schema);
 // End of mongoose model
 
 export enum Permissions {
-  UsersManageAll,
-  RolesManageAll,
+  UsersManageAll = "UsersManageAll",
+  RolesManageAll = "RolesManageAll",
 }

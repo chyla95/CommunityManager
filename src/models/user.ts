@@ -22,13 +22,12 @@ export enum AccountStatus {
 
 const schemaOptions: mongoose.SchemaOptions = {
   timestamps: true,
-  discriminatorKey: "User",
   toJSON: {
     virtuals: true,
     transform(doc, ret) {
       delete ret._id;
-      delete ret.password;
       delete ret.__v;
+      delete ret.password;
     },
   },
 };
