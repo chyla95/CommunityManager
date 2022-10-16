@@ -7,7 +7,7 @@ import { NotFoundError } from "../errors/not-found-error";
 import { authorizeEmployee } from "../middlewares/authorize-employee";
 import { Permissions } from "../models/role";
 import { Employee } from "../models/employee";
-import { User } from "../models/user";
+import { AccountStatus, User } from "../models/user";
 import { isHashtagTag } from "../utilities/validators/is-hashtag-tag";
 
 // Validation Rules
@@ -28,6 +28,46 @@ const employeeTagsBodyValidationRules = [
 ];
 
 // Controller Functions
+export const applyAsEmployee = [
+  authenticateUser,
+  validateRequest([...employeeTagsBodyValidationRules]),
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { discordTag, battleTag } = req.body;
+
+    const user = req.user;
+    if (!user) {
+      return next(new NotFoundError("Employee Not Found!"));
+    }
+
+    const employee = await Employee.findOne({ _id: user.id });
+    if (employee) {
+      return next(new NotFoundError("You Are Already Promoted To Employee!"));
+    }
+
+    if (!discordTag && !user.discordTag) return next(new BadRequestError("Discord Tag Is Required!"));
+    if (!battleTag && !user.battleTag) return next(new BadRequestError("Battle Tag Is Required!"));
+
+    if (await isDiscordTagTaken(discordTag, user.id)) {
+      return next(new BadRequestError("This Discord Tag Is Taken!"));
+    }
+
+    if (await isBattleTagTaken(battleTag, user.id)) {
+      return next(new BadRequestError("This Battle Tag Is Taken!"));
+    }
+
+    if (discordTag) user.discordTag = discordTag;
+    if (battleTag) user.battleTag = battleTag;
+    await user.save();
+
+    const createdEmployee = await Employee.create({
+      _id: user.id,
+      user: user,
+    });
+
+    res.status(201).send(createdEmployee);
+  },
+];
+
 export const getCurrentEmployee = [
   authenticateUser,
   authorizeEmployee([]),
@@ -38,41 +78,61 @@ export const getCurrentEmployee = [
   },
 ];
 
-export const createEmployee = [
+export const updateCurrentEmployee = [
   authenticateUser,
-  authorizeEmployee([Permissions.UsersManageAll]),
-  validateRequest([...employeeTagsBodyValidationRules]),
+  authorizeEmployee([]),
+  validateRequest([...employeeBodyValidationRules, ...employeeTagsBodyValidationRules]),
   async (req: Request, res: Response, next: NextFunction) => {
-    const { discordTag, battleTag } = req.body;
-    const userId = req.params.userId;
+    const { email, password, discordTag, battleTag, description } = req.body;
 
-    const user = await User.findOne({ _id: userId });
+    const employee = req.employee;
+    if (!employee) {
+      return next(new NotFoundError("Employee Not Found!"));
+    }
+
+    const user = await User.findOne({ _id: employee.id });
     if (!user) {
       return next(new NotFoundError("User Not Found!"));
     }
 
-    const employee = await Employee.findOne({ _id: userId });
-    if (employee) {
-      return next(new NotFoundError("User Is Already Promoted To Employee!"));
+    if (email && (await isEmailTaken(email, employee.id))) {
+      return next(new BadRequestError("This Email Is Taken!"));
     }
 
-    if (!discordTag && !user.discordTag) return next(new BadRequestError("Discord Tag Is Required!"));
-    if (!battleTag && !user.battleTag) return next(new BadRequestError("Battle Tag Is Required!"));
-
-    if (await isDiscordTagTaken(discordTag, userId)) {
+    if (discordTag && (await isDiscordTagTaken(discordTag, employee.id))) {
       return next(new BadRequestError("This Discord Tag Is Taken!"));
     }
 
-    if (await isBattleTagTaken(battleTag, userId)) {
+    if (battleTag && (await isBattleTagTaken(battleTag, employee.id))) {
       return next(new BadRequestError("This Battle Tag Is Taken!"));
     }
 
-    const createdEmployee = await Employee.create({
-      _id: user.id,
-      user: user,
-    });
+    if (email) user.email = email;
+    if (password) user.password = password;
+    if (discordTag) user.discordTag = discordTag;
+    if (battleTag) user.battleTag = battleTag;
+    if (description) employee.description = description;
 
-    res.status(201).send(createdEmployee);
+    await employee.save();
+    await user.save();
+
+    const updatedEmployee = await Employee.findOne({ _id: employee.id }).populate("user").populate("roles");
+    res.status(200).send(updatedEmployee);
+  },
+];
+
+export const deleteCurrentEmployee = [
+  authenticateUser,
+  authorizeEmployee([]),
+  async (req: Request, res: Response, next: NextFunction) => {
+    const employee = req.employee;
+    if (!employee) {
+      return next(new NotFoundError("Employee Not Found!"));
+    }
+
+    await employee.delete();
+
+    res.status(204).send(employee);
   },
 ];
 
@@ -105,9 +165,9 @@ export const getEmployee = [
 export const updateEmployee = [
   authenticateUser,
   authorizeEmployee([Permissions.UsersManageAll]),
-  validateRequest([...employeeBodyValidationRules, ...employeeTagsBodyValidationRules, param("employeeId").isMongoId()]),
+  validateRequest([...employeeBodyValidationRules, ...employeeTagsBodyValidationRules, body("status").isIn(Object.values(AccountStatus)), param("employeeId").isMongoId()]),
   async (req: Request, res: Response, next: NextFunction) => {
-    const { email, password, discordTag, battleTag, description } = req.body;
+    const { email, password, discordTag, battleTag, description, status } = req.body;
     const employeeId = req.params.employeeId;
 
     const employee = await Employee.findOne({ _id: employeeId }).populate("user").populate("roles");
@@ -121,7 +181,7 @@ export const updateEmployee = [
     }
 
     if (email && (await isEmailTaken(email, employeeId))) {
-      return next(new BadRequestError("This Discord Tag Is Taken!"));
+      return next(new BadRequestError("This Email Is Taken!"));
     }
 
     if (discordTag && (await isDiscordTagTaken(discordTag, employeeId))) {
@@ -136,6 +196,7 @@ export const updateEmployee = [
     if (password) user.password = password;
     if (discordTag) user.discordTag = discordTag;
     if (battleTag) user.battleTag = battleTag;
+    if (status) user.status = status;
     if (description) employee.description = description;
 
     await employee.save();
