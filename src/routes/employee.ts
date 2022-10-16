@@ -14,9 +14,3 @@ router.get("/", employeeController.getEmployees);
 router.get("/:employeeId", employeeController.getEmployee);
 router.put("/:employeeId", employeeController.updateEmployee);
 router.delete("/:employeeId", employeeController.deleteEmployee);
-
-// Implement status Active and Suspended veryfication
-// Add BASIC customer Logic, just for testing purposes
-// Cleaning: Errors, comments, routes, unification, naming, config files, db conn strings, etc.
-// Unit Tests
-// (Optional) Make Github Actions Testing Pipeline
