@@ -8,12 +8,12 @@ export const authorizeEmployee = (permissions: Permissions[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     const user = req.user;
     if (!user) {
-      return next(new NotAuthorizedError("You Are Not Signed In!"));
+      return next(new NotAuthorizedError("You Have To Be Signed In To Perform This Action!"));
     }
 
     const employee = await Employee.findOne({ _id: user.id }).populate("user").populate("roles");
     if (!employee) {
-      return next(new NotFoundError("You Are Not an Employee!"));
+      return next(new NotFoundError("You Have To Be an Employee To Perform This Action!"));
     }
 
     const hasFullSystemAccess = employee.hasFullSystemAccess();
