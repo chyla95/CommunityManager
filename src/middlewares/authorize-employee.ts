@@ -11,7 +11,7 @@ export const authorizeEmployee = (permissions: Permissions[]) => {
       return next(new NotAuthorizedError("You Have To Be Signed In To Perform This Action!"));
     }
 
-    const employee = await Employee.findOne({ _id: user.id }).populate("user").populate("roles");
+    const employee = await Employee.findOne({ user: user.id }).populate("user").populate("roles");
     if (!employee) {
       return next(new NotFoundError("You Have To Be an Employee To Perform This Action!"));
     }

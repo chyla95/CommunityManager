@@ -3,6 +3,8 @@ import { Password } from "../services/password";
 import { isEmail } from "../utilities/validators/is-email";
 import { isHashtagTag } from "../utilities/validators/is-hashtag-tag";
 import { isUrl } from "../utilities/validators/is-url";
+import { ICustomer } from "./customer";
+import { IEmployee } from "./employee";
 
 export interface IUser extends mongoose.Document {
   email: string;
@@ -11,6 +13,10 @@ export interface IUser extends mongoose.Document {
   discordTag: string;
   battleTag: string;
   status: string;
+  function: {
+    employee: IEmployee;
+    customer: ICustomer;
+  };
 
   isPasswordValid: (password: string) => Promise<boolean>;
 }
@@ -40,6 +46,18 @@ const schema = new mongoose.Schema<IUser>(
     discordTag: { type: String, validate: [isHashtagTag, 'Invalid "discordTag" Value!'] },
     battleTag: { type: String, validate: [isHashtagTag, 'Invalid "battleTag" Value!'] },
     status: { type: String, required: true, enum: AccountStatus, default: AccountStatus.Active },
+    function: {
+      employee: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Employee",
+        unique: true,
+      },
+      customer: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Customer",
+        unique: true,
+      },
+    },
   },
   schemaOptions
 );

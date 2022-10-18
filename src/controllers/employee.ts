@@ -39,7 +39,7 @@ export const applyAsEmployee = [
       return next(new NotFoundError("Employee Not Found!"));
     }
 
-    const employee = await Employee.findOne({ _id: user.id });
+    const employee = await Employee.findOne({ user: user.id });
     if (employee) {
       return next(new NotFoundError("You Are Already Promoted To Employee!"));
     }
@@ -61,8 +61,11 @@ export const applyAsEmployee = [
 
     const createdEmployee = await Employee.create({
       _id: user.id,
-      user: user,
+      user: user.id,
     });
+
+    user.function.employee = createdEmployee;
+    await user.save();
 
     res.status(201).send(createdEmployee);
   },
@@ -90,7 +93,7 @@ export const updateCurrentEmployee = [
       return next(new NotFoundError("Employee Not Found!"));
     }
 
-    const user = await User.findOne({ _id: employee.id });
+    const user = req.user;
     if (!user) {
       return next(new NotFoundError("User Not Found!"));
     }
@@ -116,7 +119,7 @@ export const updateCurrentEmployee = [
     await employee.save();
     await user.save();
 
-    const updatedEmployee = await Employee.findOne({ _id: employee.id }).populate("user").populate("roles");
+    const updatedEmployee = await Employee.findOne({ user: user.id }).populate("user").populate("roles");
     res.status(200).send(updatedEmployee);
   },
 ];
@@ -149,11 +152,11 @@ export const getEmployees = [
 export const getEmployee = [
   authenticateUser,
   authorizeEmployee([]),
-  validateRequest([param("employeeId").isMongoId()]),
+  validateRequest([param("userId").isMongoId()]),
   async (req: Request, res: Response, next: NextFunction) => {
-    const employeeId = req.params.employeeId;
+    const userId = req.params.userId;
 
-    const employee = await Employee.findOne({ _id: employeeId }).populate("user").populate("roles");
+    const employee = await Employee.findOne({ user: userId }).populate("user").populate("roles");
     if (!employee) {
       return next(new NotFoundError("Employee Not Found!"));
     }
@@ -165,30 +168,30 @@ export const getEmployee = [
 export const updateEmployee = [
   authenticateUser,
   authorizeEmployee([Permissions.UsersManageAll]),
-  validateRequest([...employeeBodyValidationRules, ...employeeTagsBodyValidationRules, body("status").isIn(Object.values(AccountStatus)), param("employeeId").isMongoId()]),
+  validateRequest([...employeeBodyValidationRules, ...employeeTagsBodyValidationRules, body("status").isIn(Object.values(AccountStatus)), param("userId").isMongoId()]),
   async (req: Request, res: Response, next: NextFunction) => {
     const { email, password, discordTag, battleTag, description, status } = req.body;
-    const employeeId = req.params.employeeId;
+    const userId = req.params.userId;
 
-    const employee = await Employee.findOne({ _id: employeeId }).populate("user").populate("roles");
+    const employee = await Employee.findOne({ user: userId }).populate("user").populate("roles");
     if (!employee) {
       return next(new NotFoundError("Employee Not Found!"));
     }
 
-    const user = await User.findOne({ _id: employeeId });
+    const user = await User.findOne({ _id: userId });
     if (!user) {
       return next(new NotFoundError("User Not Found!"));
     }
 
-    if (email && (await isEmailTaken(email, employeeId))) {
+    if (email && (await isEmailTaken(email, userId))) {
       return next(new BadRequestError("This Email Is Taken!"));
     }
 
-    if (discordTag && (await isDiscordTagTaken(discordTag, employeeId))) {
+    if (discordTag && (await isDiscordTagTaken(discordTag, userId))) {
       return next(new BadRequestError("This Discord Tag Is Taken!"));
     }
 
-    if (battleTag && (await isBattleTagTaken(battleTag, employeeId))) {
+    if (battleTag && (await isBattleTagTaken(battleTag, userId))) {
       return next(new BadRequestError("This Battle Tag Is Taken!"));
     }
 
@@ -202,7 +205,7 @@ export const updateEmployee = [
     await employee.save();
     await user.save();
 
-    const updatedEmployee = await Employee.findOne({ _id: employeeId }).populate("user").populate("roles");
+    const updatedEmployee = await Employee.findOne({ user: userId }).populate("user").populate("roles");
     res.status(200).send(updatedEmployee);
   },
 ];
@@ -210,11 +213,11 @@ export const updateEmployee = [
 export const deleteEmployee = [
   authenticateUser,
   authorizeEmployee([Permissions.UsersManageAll]),
-  validateRequest([param("employeeId").isMongoId()]),
+  validateRequest([param("userId").isMongoId()]),
   async (req: Request, res: Response, next: NextFunction) => {
-    const employeeId = req.params.employeeId;
+    const userId = req.params.userId;
 
-    const employee = await Employee.findOne({ _id: employeeId });
+    const employee = await Employee.findOne({ user: userId });
     if (!employee) {
       return next(new NotFoundError("Employee Not Found!"));
     }

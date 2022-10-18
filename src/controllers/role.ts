@@ -118,11 +118,11 @@ export const deleteRole = [
 export const assignRole = [
   authenticateUser,
   authorizeEmployee([Permissions.UsersManageAll, Permissions.RolesManageAll]),
-  validateRequest([body("employeeId").isMongoId(), body("roleId").isMongoId()]),
+  validateRequest([body("userId").isMongoId(), body("roleId").isMongoId()]),
   async (req: Request, res: Response, next: NextFunction) => {
-    const { employeeId, roleId } = req.body;
+    const { userId, roleId } = req.body;
 
-    const employee = await Employee.findOne({ _id: employeeId }).populate("roles");
+    const employee = await Employee.findOne({ user: userId }).populate("roles");
     if (!employee) {
       return next(new BadRequestError("This Employee Doesn't Exists!"));
     }
@@ -149,11 +149,11 @@ export const assignRole = [
 export const retractRole = [
   authenticateUser,
   authorizeEmployee([Permissions.UsersManageAll, Permissions.RolesManageAll]),
-  validateRequest([body("employeeId").isMongoId(), body("roleId").isMongoId()]),
+  validateRequest([body("userId").isMongoId(), body("roleId").isMongoId()]),
   async (req: Request, res: Response, next: NextFunction) => {
-    const { employeeId, roleId } = req.body;
+    const { userId, roleId } = req.body;
 
-    const employee = await Employee.findOne({ _id: employeeId }).populate("roles");
+    const employee = await Employee.findOne({ user: userId }).populate("roles");
     if (!employee) {
       return next(new BadRequestError("This Employee Doesn't Exists!"));
     }
