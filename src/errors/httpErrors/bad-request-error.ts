@@ -1,7 +1,8 @@
+import { HttpStatusCode } from "../../utilities/http-status-codes";
 import { HttpErrorBase } from "./http-error-base";
 
 export class BadRequestError extends HttpErrorBase {
-  readonly statusCode = 400;
+  readonly statusCode = HttpStatusCode.BAD_REQUEST_400;
   readonly isOperational = true;
 
   constructor(message: string = "Bad Request!") {

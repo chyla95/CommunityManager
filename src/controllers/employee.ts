@@ -9,6 +9,7 @@ import { Permissions, Role } from "../models/role";
 import { Employee, IEmployee } from "../models/employee";
 import { AccountStatus, User } from "../models/user";
 import { isHashtagTag } from "../utilities/validators/is-hashtag-tag";
+import { HttpStatusCode } from "../utilities/http-status-codes";
 
 // Validation Rules
 const employeeBodyValidationRules = [
@@ -76,7 +77,7 @@ export const applyAsEmployee = [
     user.function.employee = createdEmployee;
     await user.save();
 
-    res.status(201).send(createdEmployee);
+    res.status(HttpStatusCode.CREATED_201).send(createdEmployee);
   },
 ];
 
@@ -86,7 +87,7 @@ export const getCurrentEmployee = [
   async (req: Request, res: Response, next: NextFunction) => {
     const employee = req.employee;
 
-    res.status(200).send(employee);
+    res.status(HttpStatusCode.OK_200).send(employee);
   },
 ];
 
@@ -129,7 +130,7 @@ export const updateCurrentEmployee = [
     await user.save();
 
     const updatedEmployee = await Employee.findOne({ user: user.id }).populate("user").populate("roles");
-    res.status(200).send(updatedEmployee);
+    res.status(HttpStatusCode.OK_200).send(updatedEmployee);
   },
 ];
 
@@ -144,7 +145,7 @@ export const deleteCurrentEmployee = [
 
     await employee.delete();
 
-    res.status(204).send(employee);
+    res.status(HttpStatusCode.NO_CONTENT_204).send(employee);
   },
 ];
 
@@ -188,7 +189,7 @@ export const getEmployees = [
       employees = await Employee.find({}, null, { sort: sortingOptions }).populate("user").populate("roles");
     }
 
-    res.status(200).send(employees);
+    res.status(HttpStatusCode.OK_200).send(employees);
   },
 ];
 
@@ -204,7 +205,7 @@ export const getEmployee = [
       return next(new NotFoundError("Employee Not Found!"));
     }
 
-    res.status(200).send(employee);
+    res.status(HttpStatusCode.OK_200).send(employee);
   },
 ];
 
@@ -249,7 +250,7 @@ export const updateEmployee = [
     await user.save();
 
     const updatedEmployee = await Employee.findOne({ user: userId }).populate("user").populate("roles");
-    res.status(200).send(updatedEmployee);
+    res.status(HttpStatusCode.OK_200).send(updatedEmployee);
   },
 ];
 
@@ -267,7 +268,7 @@ export const deleteEmployee = [
 
     await employee.delete();
 
-    res.status(204).send(employee);
+    res.status(HttpStatusCode.NO_CONTENT_204).send(employee);
   },
 ];
 

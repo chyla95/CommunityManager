@@ -1,8 +1,9 @@
 import { ValidationError } from "express-validator";
+import { HttpStatusCode } from "../../utilities/http-status-codes";
 import { HttpErrorBase } from "./http-error-base";
 
 export class RequestValidationError extends HttpErrorBase {
-  readonly statusCode = 400;
+  readonly statusCode = HttpStatusCode.BAD_REQUEST_400;
   readonly isOperational = true;
   readonly errors;
 

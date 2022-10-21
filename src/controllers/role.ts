@@ -8,6 +8,7 @@ import { authorizeEmployee } from "../middlewares/authorize-employee";
 import { Permissions } from "../models/role";
 import { NotFoundError } from "../errors/httpErrors/not-found-error";
 import { Employee } from "../models/employee";
+import { HttpStatusCode } from "../utilities/http-status-codes";
 
 // Validation Rules
 const roleBodyValidationRules = [
@@ -39,7 +40,7 @@ export const createRole = [
       permissions: permissions,
     });
 
-    res.status(201).send(role);
+    res.status(HttpStatusCode.CREATED_201).send(role);
   },
 ];
 
@@ -49,7 +50,7 @@ export const getRoles = [
   async (req: Request, res: Response, next: NextFunction) => {
     const role = await Role.find({});
 
-    res.status(200).send(role);
+    res.status(HttpStatusCode.OK_200).send(role);
   },
 ];
 
@@ -65,7 +66,7 @@ export const getRole = [
       return next(new NotFoundError("Role Not Found!"));
     }
 
-    res.status(200).send(role);
+    res.status(HttpStatusCode.OK_200).send(role);
   },
 ];
 
@@ -93,7 +94,7 @@ export const updateRole = [
     role.permissions = permissions;
     await role.save();
 
-    res.status(200).send(role);
+    res.status(HttpStatusCode.OK_200).send(role);
   },
 ];
 
@@ -111,7 +112,7 @@ export const deleteRole = [
 
     await role.delete();
 
-    res.status(204).send();
+    res.status(HttpStatusCode.NO_CONTENT_204).send();
   },
 ];
 
@@ -142,7 +143,7 @@ export const assignRole = [
     employee.roles.push(role);
     await employee.save();
 
-    res.status(201).send(employee);
+    res.status(HttpStatusCode.CREATED_201).send(employee);
   },
 ];
 
@@ -175,7 +176,7 @@ export const retractRole = [
     });
     await employee.save();
 
-    res.status(204).send();
+    res.status(HttpStatusCode.NO_CONTENT_204).send();
   },
 ];
 

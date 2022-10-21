@@ -5,6 +5,7 @@ import { BadRequestError } from "../errors/httpErrors/bad-request-error";
 import { validateRequest } from "../middlewares/validate-request";
 import { User } from "../models/user";
 import { isHashtagTag } from "../utilities/validators/is-hashtag-tag";
+import { HttpStatusCode } from "../utilities/http-status-codes";
 
 const userCredentialValidationRules = [
   body("email", "Invalid e-mail adress.").isEmail().normalizeEmail(),
@@ -52,7 +53,7 @@ export const signUpUser = [
     const user = await User.create({ email: email, password: password, discordTag: discordTag, battleTag: battleTag });
     const jwt = issueJwt(user);
 
-    res.status(201).send({ user, jwt });
+    res.status(HttpStatusCode.CREATED_201).send({ user, jwt });
   },
 ];
 
@@ -74,6 +75,6 @@ export const signInUser = [
 
     const jwt = issueJwt(user);
 
-    res.status(200).send({ user, jwt });
+    res.status(HttpStatusCode.OK_200).send({ user, jwt });
   },
 ];
