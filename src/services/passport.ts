@@ -2,12 +2,12 @@ import passport from "passport";
 import { Strategy, ExtractJwt } from "passport-jwt";
 import { Algorithm, default as jsonwebtoken } from "jsonwebtoken";
 import { User, IUser } from "../models/user";
-import { configJwt } from "../configuration/configuration";
+import { jwtConfiguration } from "../configuration/jwt-configuration";
 
 const strategyOptions = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
   secretOrKey: process.env.JWT_RSA_PUBLIC_KEY!,
-  algorithms: [configJwt.cryptographyAlgorithm],
+  algorithms: [jwtConfiguration.cryptographyAlgorithm],
 };
 
 passport.use(
@@ -30,13 +30,13 @@ export const issueJwt = (user: IUser) => {
   };
 
   const signedToken = jsonwebtoken.sign(payload, process.env.JWT_RSA_PRIVATE_KEY!, {
-    expiresIn: configJwt.expirationTime,
-    algorithm: configJwt.cryptographyAlgorithm as Algorithm,
+    expiresIn: jwtConfiguration.expirationTime,
+    algorithm: jwtConfiguration.cryptographyAlgorithm as Algorithm,
   });
 
   return {
     token: signedToken,
-    expirationTime: configJwt.expirationTime,
+    expirationTime: jwtConfiguration.expirationTime,
   };
 };
 
