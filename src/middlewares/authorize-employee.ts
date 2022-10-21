@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { Employee, IEmployee } from "../models/employee";
-import { NotAuthorizedError } from "../errors/not-authorized-error";
-import { NotFoundError } from "../errors/not-found-error";
+import { NotAuthorizedError } from "../errors/httpErrors/not-authorized-error";
+import { NotFoundError } from "../errors/httpErrors/not-found-error";
 import { Permissions } from "../models/role";
 
 export const authorizeEmployee = (permissions: Permissions[]) => {

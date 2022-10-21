@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import { ErrorBase } from "../errors/error-base";
+import { HttpErrorBase } from "../errors/httpErrors/http-error-base";
 
 export const handleException = (error: Error, req: Request, res: Response, next: NextFunction) => {
-  if (error instanceof ErrorBase) {
+  if (error instanceof HttpErrorBase) {
     if (!error.isOperational) {
       return process.exit(1);
     }

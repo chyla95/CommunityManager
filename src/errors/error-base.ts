@@ -1,5 +1,4 @@
 export abstract class ErrorBase extends Error {
-  abstract readonly statusCode: number;
   abstract readonly isOperational: boolean;
   readonly message: string;
 

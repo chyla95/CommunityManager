@@ -1,6 +1,6 @@
-import { ErrorBase } from "./error-base";
+import { HttpErrorBase } from "./http-error-base";
 
-export class NotAuthorizedError extends ErrorBase {
+export class NotAuthorizedError extends HttpErrorBase {
   readonly statusCode = 401;
   readonly isOperational = true;
 

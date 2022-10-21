@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import { body, param, query } from "express-validator";
-import { BadRequestError } from "../errors/bad-request-error";
+import { BadRequestError } from "../errors/httpErrors/bad-request-error";
 import { validateRequest } from "../middlewares/validate-request";
 import { authenticateUser } from "../middlewares/authenticate-user";
-import { NotFoundError } from "../errors/not-found-error";
+import { NotFoundError } from "../errors/httpErrors/not-found-error";
 import { authorizeEmployee } from "../middlewares/authorize-employee";
 import { Permissions, Role } from "../models/role";
 import { Employee, IEmployee } from "../models/employee";

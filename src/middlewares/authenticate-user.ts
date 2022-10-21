@@ -1,7 +1,7 @@
 import passport from "passport";
 import { Request, Response, NextFunction } from "express";
 import { AccountStatus, IUser } from "../models/user";
-import { NotAuthorizedError } from "../errors/not-authorized-error";
+import { NotAuthorizedError } from "../errors/httpErrors/not-authorized-error";
 
 // export const authenticateUser = passport.authenticate("jwt", { session: false });
 export const authenticateUser = (req: Request, res: Response, next: NextFunction) => {

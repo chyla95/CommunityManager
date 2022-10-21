@@ -1,6 +1,6 @@
-import { ErrorBase } from "./error-base";
+import { HttpErrorBase } from "./http-error-base";
 
-export class NotFoundError extends ErrorBase {
+export class NotFoundError extends HttpErrorBase {
   readonly statusCode = 404;
   readonly isOperational = true;
 

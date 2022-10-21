@@ -1,7 +1,7 @@
 import { ValidationError } from "express-validator";
-import { ErrorBase } from "./error-base";
+import { HttpErrorBase } from "./http-error-base";
 
-export class RequestValidationError extends ErrorBase {
+export class RequestValidationError extends HttpErrorBase {
   readonly statusCode = 400;
   readonly isOperational = true;
   readonly errors;

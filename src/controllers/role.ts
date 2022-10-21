@@ -1,12 +1,12 @@
 import { Request, Response, NextFunction } from "express";
 import { body, param } from "express-validator";
-import { BadRequestError } from "../errors/bad-request-error";
+import { BadRequestError } from "../errors/httpErrors/bad-request-error";
 import { validateRequest } from "../middlewares/validate-request";
 import { authenticateUser } from "../middlewares/authenticate-user";
 import { Role } from "../models/role";
 import { authorizeEmployee } from "../middlewares/authorize-employee";
 import { Permissions } from "../models/role";
-import { NotFoundError } from "../errors/not-found-error";
+import { NotFoundError } from "../errors/httpErrors/not-found-error";
 import { Employee } from "../models/employee";
 
 // Validation Rules

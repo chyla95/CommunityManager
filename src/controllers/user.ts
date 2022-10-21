@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { body } from "express-validator";
 import { issueJwt } from "../services/passport";
-import { BadRequestError } from "../errors/bad-request-error";
+import { BadRequestError } from "../errors/httpErrors/bad-request-error";
 import { validateRequest } from "../middlewares/validate-request";
 import { User } from "../models/user";
 import { isHashtagTag } from "../utilities/validators/is-hashtag-tag";

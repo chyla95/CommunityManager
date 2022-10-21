@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { IUser } from "./user";
 import { IRole, Permissions } from "./role";
+import { SystemError } from "../errors/system-error";
 
 export interface IEmployee extends IUser {
   user: IUser;
@@ -72,8 +73,7 @@ schema.methods.hasPermission = function (permission: Permissions) {
         break;
       }
       default: {
-        // TODO: Change/Implement to "SystemError"
-        throw new Error("Permission Cannot Be Handled - Not Implemented Or Not Mapped.");
+        throw new SystemError("Permission Cannot Be Handled - Not Implemented Or Not Mapped!");
       }
     }
     if (hasPermission) break;

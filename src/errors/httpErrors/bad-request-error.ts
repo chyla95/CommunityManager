@@ -1,6 +1,6 @@
-import { ErrorBase } from "./error-base";
+import { HttpErrorBase } from "./http-error-base";
 
-export class BadRequestError extends ErrorBase {
+export class BadRequestError extends HttpErrorBase {
   readonly statusCode = 400;
   readonly isOperational = true;
 
