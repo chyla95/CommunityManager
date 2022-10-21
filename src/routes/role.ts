@@ -3,11 +3,11 @@ import * as roleController from "../controllers/role";
 
 export const router = Router();
 
-// Assign / Retract Roles
+// Assign / Retract Roles (manageAll)
 router.post("/assign", roleController.assignRole);
 router.delete("/retract", roleController.retractRole);
 
-// Roles
+// Roles (manageAll)
 router.post("/", roleController.createRole);
 router.get("/", roleController.getRoles);
 router.get("/:roleId", roleController.getRole);
