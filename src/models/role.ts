@@ -27,7 +27,6 @@ const schemaOptions: mongoose.SchemaOptions = {
   },
 };
 
-// Naming: manageAll / manageOwn
 const schema = new mongoose.Schema<IRole>(
   {
     name: { type: String, required: true, unique: true },
@@ -47,8 +46,6 @@ const schema = new mongoose.Schema<IRole>(
 );
 
 export const Role = mongoose.model<IRole>("Role", schema);
-
-// End of mongoose model
 
 export enum Permissions {
   UsersManageAll = "UsersManageAll",

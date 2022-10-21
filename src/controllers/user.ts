@@ -7,6 +7,7 @@ import { User } from "../models/user";
 import { isHashtagTag } from "../utilities/validators/is-hashtag-tag";
 import { HttpStatusCode } from "../utilities/http-status-codes";
 
+// Validation Rules
 const userCredentialValidationRules = [
   body("email", "Invalid e-mail adress.").isEmail().normalizeEmail(),
   body("password", "Password has to be between 5 and 50 characters long.").isLength({ min: 5, max: 50 }),
@@ -25,7 +26,7 @@ const userBodyValidationRules = [
     }),
 ];
 
-// Controller: SignUp
+// Controller Functions
 export const signUpUser = [
   validateRequest([...userCredentialValidationRules, ...userBodyValidationRules]),
   async (req: Request, res: Response, next: NextFunction) => {
@@ -57,7 +58,6 @@ export const signUpUser = [
   },
 ];
 
-// Controller: SignIn
 export const signInUser = [
   validateRequest([...userCredentialValidationRules]),
   async (req: Request, res: Response, next: NextFunction) => {
