@@ -9,6 +9,7 @@ import { router as roleRouter } from "./routes/role";
 import { router as employeeRouter } from "./routes/employee";
 import { Environment, getEnvironmentType } from "./utilities/get-environment-type";
 import { CriticalSystemError } from "./errors/critical-system-error";
+import { configureConsole } from "./utilities/configure-console";
 
 const app = express();
 
@@ -22,6 +23,8 @@ app.use("/api/employee", employeeRouter);
 app.use("/api/role", roleRouter);
 app.use(handleInvalidRoute);
 app.use(handleException);
+
+configureConsole();
 
 const startApp = async () => {
   const environmentType = getEnvironmentType(app);
