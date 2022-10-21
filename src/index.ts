@@ -7,6 +7,8 @@ import { handleInvalidRoute } from "./middlewares/handle-invalid-route";
 import { router as userRouter } from "./routes/user";
 import { router as roleRouter } from "./routes/role";
 import { router as employeeRouter } from "./routes/employee";
+import { Environment, getEnvironmentType } from "./utilities/get-environment-type";
+import { CriticalSystemError } from "./errors/critical-system-error";
 
 const app = express();
 
@@ -22,28 +24,32 @@ app.use(handleInvalidRoute);
 app.use(handleException);
 
 const startApp = async () => {
-  if (!process.env.DATABASE_URL) {
-    throw new Error("DATABASE_URL is not defined!");
+  const environmentType = getEnvironmentType(app);
+  console.info("Environment Type: " + environmentType);
+
+  if (!process.env.DATABASE_URL_DEV && environmentType == Environment.Development) {
+    throw new CriticalSystemError("DATABASE_URL is not defined!");
   }
 
   if (!process.env.JWT_RSA_PRIVATE_KEY) {
-    throw new Error("JWT_RSA_PRIVATE_KEY is not defined!");
+    throw new CriticalSystemError("JWT_RSA_PRIVATE_KEY is not defined!");
   }
 
   if (!process.env.JWT_RSA_PUBLIC_KEY) {
-    throw new Error("JWT_RSA_PUBLIC_KEY is not defined!");
+    throw new CriticalSystemError("JWT_RSA_PUBLIC_KEY is not defined!");
   }
 
   try {
-    await mongoose.connect(process.env.DATABASE_URL);
+    let mongoDbConnectionString = environmentType == Environment.Production ? "ToDo" : process.env.DATABASE_URL_DEV!;
+    await mongoose.connect(mongoDbConnectionString);
     console.info("Connected: MongoDB");
   } catch (error) {
-    console.error(error);
+    throw new CriticalSystemError("Could Not Connect To The Database!");
   }
 
   const appPort = process.env.PORT || 3000;
   app.listen(appPort, () => {
-    console.info(`App port: ${appPort}`);
+    console.info(`App Port: ${appPort}`);
   });
 };
 startApp();
