@@ -1,12 +1,12 @@
 import { Request, Response, NextFunction } from "express";
-import { body, param } from "express-validator";
+import { body, param, query } from "express-validator";
 import { BadRequestError } from "../errors/bad-request-error";
 import { validateRequest } from "../middlewares/validate-request";
 import { authenticateUser } from "../middlewares/authenticate-user";
 import { NotFoundError } from "../errors/not-found-error";
 import { authorizeEmployee } from "../middlewares/authorize-employee";
-import { Permissions } from "../models/role";
-import { Employee } from "../models/employee";
+import { Permissions, Role } from "../models/role";
+import { Employee, IEmployee } from "../models/employee";
 import { AccountStatus, User } from "../models/user";
 import { isHashtagTag } from "../utilities/validators/is-hashtag-tag";
 
@@ -25,6 +25,15 @@ const employeeTagsBodyValidationRules = [
   body("battleTag").custom((value) => {
     return isHashtagTag(value);
   }),
+];
+
+const employeePaginationValidationRules = [
+  query("page").optional().isInt({ min: 1 }),
+  query("pageSize").optional().isInt({ min: 1 }),
+  query("sortBy").optional().isAlphanumeric(),
+  query("sortBy").optional().isIn(["id", "email", "discordTag", "battleTag", "status"]),
+  query("sortingOrder").optional().isAlphanumeric(),
+  query("sortingOrder").optional().isIn(["asc", "desc"]),
 ];
 
 // Controller Functions
@@ -142,8 +151,42 @@ export const deleteCurrentEmployee = [
 export const getEmployees = [
   authenticateUser,
   authorizeEmployee([]),
+  validateRequest([...employeePaginationValidationRules]),
   async (req: Request, res: Response, next: NextFunction) => {
-    const employees = await Employee.find({}).populate("user").populate("roles");
+    const { page, pageSize, sortBy = "id", sortingOrder = "asc" } = req.query;
+
+    let employees: IEmployee[];
+
+    let sortingOptions: any;
+    if (sortBy == "id") sortingOptions = { _id: sortingOrder };
+    if (sortBy == "email") sortingOptions = { "userLookup.email": sortingOrder };
+    if (sortBy == "discordTag") sortingOptions = { "userLookup.discordTag": sortingOrder };
+    if (sortBy == "battleTag") sortingOptions = { "userLookup.battleTag": sortingOrder };
+    if (sortBy == "status") sortingOptions = { "userLookup.status": sortingOrder };
+
+    if (page && pageSize) {
+      employees = await Employee.aggregate([
+        {
+          $lookup: {
+            from: "users",
+            localField: "user",
+            foreignField: "_id",
+            as: "userLookup",
+          },
+        },
+      ])
+        .sort(sortingOptions)
+        .skip((+page - 1) * +pageSize)
+        .limit(+pageSize);
+
+      await Role.populate(employees, { path: "roles" });
+      await User.populate(employees, { path: "user" });
+      employees.forEach((e: any) => {
+        delete e.userLookup;
+      });
+    } else {
+      employees = await Employee.find({}, null, { sort: sortingOptions }).populate("user").populate("roles");
+    }
 
     res.status(200).send(employees);
   },
