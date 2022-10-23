@@ -7,7 +7,7 @@ import { handleInvalidRoute } from "./middlewares/handle-invalid-route";
 import { router as userRouter } from "./routes/user";
 import { router as roleRouter } from "./routes/role";
 import { router as employeeRouter } from "./routes/employee";
-import { Environment, getEnvironmentType } from "./utilities/get-environment-type";
+import { getEnvironmentType } from "./utilities/get-environment-type";
 import { CriticalSystemError } from "./errors/critical-system-error";
 import { setupConsole } from "./utilities/setup-console";
 import { setupCors } from "./middlewares/setup-cors";
@@ -29,10 +29,7 @@ app.use(handleException);
 setupConsole();
 
 const startApp = async () => {
-  const environmentType = getEnvironmentType(app);
-  console.info("Environment Type: " + environmentType);
-
-  if (!process.env.DATABASE_URL_DEV && environmentType == Environment.Development) {
+  if (!process.env.DATABASE_URL) {
     throw new CriticalSystemError("DATABASE_URL is not defined!");
   }
 
@@ -45,16 +42,18 @@ const startApp = async () => {
   }
 
   try {
-    let mongoDbConnectionString = environmentType == Environment.Production ? "ToDo" : process.env.DATABASE_URL_DEV!;
-    await mongoose.connect(mongoDbConnectionString);
+    await mongoose.connect(process.env.DATABASE_URL);
     console.info("Connected: MongoDB");
   } catch (error) {
     throw new CriticalSystemError("Could Not Connect To The Database!");
   }
 
   const appPort = process.env.PORT || 3000;
+  const appEnvironment = getEnvironmentType(app);
   app.listen(appPort, () => {
-    console.info(`App Port: ${appPort}`);
+    console.info(`The App is Running
+    -> Port: ${appPort}
+    -> Environment: ${appEnvironment}`);
   });
 };
 startApp();
