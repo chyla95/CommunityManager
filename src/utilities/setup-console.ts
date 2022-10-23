@@ -7,7 +7,7 @@ const _warnPrefix: string = "🟡 Warning:";
 const _infoPrefix: string = "🔵 Info:";
 const _logPrefix: string = "🟢 Log:";
 
-export const configureConsole = () => {
+export const setupConsole = () => {
   if (isConsoleConfigured) {
     throw new CriticalSystemError("The Console Is Already Configured - You Cannot Re-Configure It!");
   }
