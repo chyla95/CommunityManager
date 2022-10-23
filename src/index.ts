@@ -10,6 +10,7 @@ import { router as employeeRouter } from "./routes/employee";
 import { Environment, getEnvironmentType } from "./utilities/get-environment-type";
 import { CriticalSystemError } from "./errors/critical-system-error";
 import { configureConsole } from "./utilities/configure-console";
+import { setupCors } from "./middlewares/setup-cors";
 
 const app = express();
 
@@ -17,6 +18,7 @@ passport.initialize();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(setupCors);
 
 app.use("/api/user", userRouter);
 app.use("/api/employee", employeeRouter);
