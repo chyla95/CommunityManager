@@ -32,23 +32,14 @@ export const signUpUser = [
   async (req: Request, res: Response, next: NextFunction) => {
     const { email, password, discordTag, battleTag } = req.body;
 
-    const isEmailTaken = await User.findOne({ email: email });
-    if (isEmailTaken) {
-      return next(new BadRequestError("This Email Is Taken!"));
-    }
+    if (await isEmailTaken(email)) return next(new BadRequestError("This Email Is Taken!"));
 
     if (discordTag) {
-      const isdiscordTagTaken = await User.findOne({ discordTag: discordTag });
-      if (isdiscordTagTaken) {
-        return next(new BadRequestError("This Discord Tag Is Taken!"));
-      }
+      if (await isDiscordTagTaken(discordTag)) return next(new BadRequestError("This Discord Tag Is Taken!"));
     }
 
     if (battleTag) {
-      const isbattleTagTaken = await User.findOne({ battleTag: battleTag });
-      if (isbattleTagTaken) {
-        return next(new BadRequestError("This Battle Tag Is Taken!"));
-      }
+      if (await isBattleTagTaken(battleTag)) return next(new BadRequestError("This Battle Tag Is Taken!"));
     }
 
     const user = await User.create({ email: email, password: password, discordTag: discordTag, battleTag: battleTag });
@@ -78,3 +69,22 @@ export const signInUser = [
     res.status(HttpStatusCode.OK_200).send({ user, jwt });
   },
 ];
+
+// Helper Functions
+export const isDiscordTagTaken = async (discordTag: string) => {
+  const isDiscordTagTaken = await User.findOne({ discordTag: discordTag });
+  if (isDiscordTagTaken) return true;
+  return false;
+};
+
+export const isBattleTagTaken = async (battleTag: string) => {
+  const isbattleTagTaken = await User.findOne({ battleTag: battleTag });
+  if (isbattleTagTaken) return true;
+  return false;
+};
+
+export const isEmailTaken = async (email: string) => {
+  const isEmailTaken = await User.findOne({ email: email });
+  if (isEmailTaken) return true;
+  return false;
+};
