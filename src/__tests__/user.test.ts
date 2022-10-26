@@ -72,7 +72,7 @@ describe("Route: /signup", () => {
 
 describe("Route: /signin", () => {
   it("successfully signs in a user", async () => {
-    const user = new User({ email: inputSigningInUserData.email, password: await Password.encrypt(inputSigningInUserData.password) });
+    const user = new User({ ...inputSigningInUserData, password: await Password.encrypt(inputSigningInUserData.password) });
     // @ts-ignore
     jest.spyOn(User, "findOne").mockReturnValue(user);
 
@@ -84,7 +84,6 @@ describe("Route: /signin", () => {
   });
 
   it("throws an error, if user enters invalid email", async () => {
-    const user = new User({ email: inputSigningInUserData.email, password: await Password.encrypt(inputSigningInUserData.password) });
     // @ts-ignore
     jest.spyOn(User, "findOne").mockReturnValue(null);
 
@@ -94,7 +93,7 @@ describe("Route: /signin", () => {
   });
 
   it("throws an error, if user enters invalid password", async () => {
-    const user = new User({ email: inputSigningInUserData.email, password: await Password.encrypt(inputSigningInUserData.password) });
+    const user = new User({ ...inputSigningInUserData, password: await Password.encrypt(inputSigningInUserData.password) });
     // @ts-ignore
     jest.spyOn(User, "findOne").mockReturnValue(user);
 
